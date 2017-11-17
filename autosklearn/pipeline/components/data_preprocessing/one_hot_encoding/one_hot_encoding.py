@@ -35,45 +35,32 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
 
         self.preprocessor = autosklearn.pipeline.implementations.OneHotEncoder\
             .OneHotEncoder(minimum_fraction=self.minimum_fraction,
-                           categorical_features=categorical_features)
+                           categorical_features=categorical_features,
+                           sparse=True)
 
         self.preprocessor = self.preprocessor.fit(X)
         return self
 
     def transform(self, X):
-        import scipy.sparse
 
-        is_sparse = scipy.sparse.issparse(X)
         if self.preprocessor is None:
             raise NotImplementedError()
-        X = self.preprocessor.transform(X)
-        if is_sparse:
-            return X
-        elif isinstance(X, np.ndarray):
-            return X
-        else:
-            return X.toarray()
+        Xt = self.preprocessor.transform(X)
+        return Xt
 
     @staticmethod
     def get_properties(dataset_properties=None):
         return {'shortname': '1Hot',
                 'name': 'One Hot Encoder',
-                'handles_missing_values': True,
-                'handles_nominal_values': True,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
-                'is_deterministic': True,
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (INPUT,),
-                'preferred_dtype': None}
+                'output': (SPARSE, UNSIGNED_DATA)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
